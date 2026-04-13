@@ -1,11 +1,11 @@
-import time
-import cv2
-import torch
-import numpy as np
 import sys
 
+import cv2
+import numpy as np
+import torch
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
 from unitree_sdk2py.go2.video.video_client import VideoClient
+
 
 # ----------------------------
 # Preprocess and detect
@@ -17,6 +17,7 @@ def preprocess(frame):
     img = np.ascontiguousarray(img) / 255.0
     return torch.tensor(img).float().unsqueeze(0)
 
+
 def detect_person(model, frame, conf_thresh=0.5):
     img = preprocess(frame)
     with torch.no_grad():
@@ -27,6 +28,7 @@ def detect_person(model, frame, conf_thresh=0.5):
             x1, y1, x2, y2 = map(int, xyxy)
             boxes.append((x1, y1, x2 - x1, y2 - y1))
     return boxes
+
 
 # ----------------------------
 # Main Camera Loop
@@ -50,7 +52,7 @@ def camera_loop(model):
 
         boxes = detect_person(model, frame)
 
-        for (x, y, w, h) in boxes:
+        for x, y, w, h in boxes:
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             cv2.putText(frame, "Person", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
@@ -60,6 +62,7 @@ def camera_loop(model):
             break
 
     cv2.destroyAllWindows()
+
 
 # ----------------------------
 # Main
